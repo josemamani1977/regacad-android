@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="description" content="Sistema de Registro Académico - Gestiona estudiantes, tareas, evaluaciones y asistencia">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <title>RegAcad - Sistema de Registro Académico</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>RegAcad</h1>
+            <p class="subtitle">Sistema de Registro Académico</p>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Menú">&#9776;</button>
+    </header>
+
+    <div class="app-container">
+        <nav class="sidebar" id="sidebar">
+            <ul class="nav-list">
+                <li><a href="#estudiantes" class="nav-link active" data-section="estudiantes">&#128218; Estudiantes</a></li>
+                <li><a href="#tareas" class="nav-link" data-section="tareas">&#128221; Tareas</a></li>
+                <li><a href="#evaluaciones" class="nav-link" data-section="evaluaciones">&#128203; Evaluaciones</a></li>
+                <li><a href="#asistencia" class="nav-link" data-section="asistencia">&#128197; Asistencia</a></li>
+                <li><a href="#actividad" class="nav-link" data-section="actividad">&#128200; Actividad</a></li>
+                <li><a href="#notas" class="nav-link" data-section="notas">&#128202; Notas</a></li>
+                <li><a href="#reportes" class="nav-link" data-section="reportes">&#128200; Reportes</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <!-- Sección: Estudiantes -->
+            <section id="estudiantes" class="section active">
+                <h2>&#128218; Gestión de Estudiantes</h2>
+                <form id="formEstudiante" class="form-card">
+                    <h3>Registrar Estudiante</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="estNombre">Nombre Completo</label>
+                            <input type="text" id="estNombre" placeholder="Ej: Juan Pérez López" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="estMatricula">Matrícula / Carnet Universitario</label>
+                            <input type="text" id="estMatricula" placeholder="Ej: 2024-1234" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="estEmail">Correo Electrónico</label>
+                            <input type="email" id="estEmail" placeholder="ejemplo@universidad.edu">
+                        </div>
+                        <div class="form-group">
+                            <label for="estCarrera">Carrera</label>
+                            <input type="text" id="estCarrera" placeholder="Ej: Ingeniería en Sistemas">
+                        </div>
+                        <div class="form-group">
+                            <label for="estCurso">Curso</label>
+                            <select id="estCurso" required>
+                                <option value="">Seleccionar curso...</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Registrar Estudiante</button>
+                </form>
+
+                <div class="form-card">
+                    <h3>Importar Estudiantes desde CSV</h3>
+                    <p style="color:var(--gray-600);font-size:0.85rem;margin-bottom:12px;">
+                        Formato: <code>matricula;nombre;email;carrera;curso</code> (separado por punto y coma)
+                    </p>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+                        <input type="file" id="csvFileInput" accept=".csv" style="flex:1;min-width:200px;padding:8px;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-family:inherit;">
+                        <select id="csvDefaultCurso" style="padding:8px 12px;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-family:inherit;min-width:100px;">
+                            <option value="">Curso por defecto...</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </select>
+                        <button id="btnImportarCSV" class="btn btn-primary">Importar CSV</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <h3>Lista de Estudiantes</h3>
+                    <div class="search-bar">
+                        <input type="text" id="searchEstudiantes" placeholder="Buscar por nombre o matrícula...">
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Matrícula</th>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Carrera</th>
+                                    <th>Curso</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="estudiantesTableBody"></tbody>
+                        </table>
+                    </div>
+                    <p id="estudiantesEmpty" class="empty-msg">No hay estudiantes registrados.</p>
+                </div>
+            </section>
+
+            <!-- Sección: Tareas -->
+            <section id="tareas" class="section">
+                <h2>&#128221; Gestión de Tareas</h2>
+                <form id="formTarea" class="form-card">
+                    <h3>Registrar Tarea</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="tareaEstudiante">Estudiante</label>
+                            <select id="tareaEstudiante" required>
+                                <option value="">Seleccionar estudiante...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tareaNombre">Nombre de la Tarea</label>
+                            <input type="text" id="tareaNombre" placeholder="Ej: Tarea 1 - Álgebra" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tareaFecha">Fecha</label>
+                            <input type="date" id="tareaFecha" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tareaPuntaje">Puntaje (0-100)</label>
+                            <input type="number" id="tareaPuntaje" min="0" max="100" step="0.1" placeholder="Ej: 85" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Registrar Tarea</button>
+                </form>
+
+                <div class="table-container">
+                    <h3>Lista de Tareas</h3>
+                    <div class="search-bar">
+                        <select id="filterTareaEstudiante">
+                            <option value="">Todos los estudiantes</option>
+                        </select>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    <th>Tarea</th>
+                                    <th>Fecha</th>
+                                    <th>Puntaje</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tareasTableBody"></tbody>
+                        </table>
+                    </div>
+                    <p id="tareasEmpty" class="empty-msg">No hay tareas registradas.</p>
+                </div>
+            </section>
+
+            <!-- Sección: Evaluaciones -->
+            <section id="evaluaciones" class="section">
+                <h2>&#128203; Gestión de Evaluaciones</h2>
+                <form id="formEvaluacion" class="form-card">
+                    <h3>Registrar Evaluación</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="evalEstudiante">Estudiante</label>
+                            <select id="evalEstudiante" required>
+                                <option value="">Seleccionar estudiante...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="evalNombre">Nombre de la Evaluación</label>
+                            <input type="text" id="evalNombre" placeholder="Ej: Examen Parcial 1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="evalFecha">Fecha</label>
+                            <input type="date" id="evalFecha" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="evalPuntaje">Puntaje (0-100)</label>
+                            <input type="number" id="evalPuntaje" min="0" max="100" step="0.1" placeholder="Ej: 90" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Registrar Evaluación</button>
+                </form>
+
+                <div class="table-container">
+                    <h3>Lista de Evaluaciones</h3>
+                    <div class="search-bar">
+                        <select id="filterEvalEstudiante">
+                            <option value="">Todos los estudiantes</option>
+                        </select>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    <th>Evaluación</th>
+                                    <th>Fecha</th>
+                                    <th>Puntaje</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="evaluacionesTableBody"></tbody>
+                        </table>
+                    </div>
+                    <p id="evaluacionesEmpty" class="empty-msg">No hay evaluaciones registradas.</p>
+                </div>
+            </section>
+
+            <!-- Sección: Asistencia -->
+            <section id="asistencia" class="section">
+                <h2>&#128197; Control de Asistencia</h2>
+                <form id="formAsistencia" class="form-card">
+                    <h3>Registrar Asistencia</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="asisEstudiante">Estudiante</label>
+                            <select id="asisEstudiante" required>
+                                <option value="">Seleccionar estudiante...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="asisFecha">Fecha</label>
+                            <input type="date" id="asisFecha" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="asisEstado">Estado</label>
+                            <select id="asisEstado" required>
+                                <option value="Presente">Presente</option>
+                                <option value="Ausente">Ausente</option>
+                                <option value="Justificado">Justificado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Registrar Asistencia</button>
+                </form>
+
+                <div class="form-card">
+                    <h3>&#9889; Registro Rápido de Asistencia</h3>
+                    <p style="color:var(--gray-600);font-size:0.85rem;margin-bottom:12px;">
+                        Marca la asistencia de todos los estudiantes de un curso en una sola vista.
+                    </p>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="rapidaFecha">Fecha</label>
+                            <input type="date" id="rapidaFecha" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="rapidaCurso">Filtrar por Curso</label>
+                            <select id="rapidaCurso">
+                                <option value="">Todos los cursos</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+                        <button id="btnTodosPresente" class="btn btn-sm btn-success" style="background:var(--success);color:white;">&#10003; Todos Presente</button>
+                        <button id="btnTodosAusente" class="btn btn-sm btn-danger">&#10007; Todos Ausente</button>
+                        <button id="btnTodosJustificado" class="btn btn-sm btn-warning">&#9888; Todos Justificado</button>
+                        <button id="btnGuardarAsistenciaRapida" class="btn btn-sm btn-primary">&#128190; Guardar Asistencia</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Matrícula</th>
+                                    <th>Nombre</th>
+                                    <th>Curso</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="asistenciaRapidaBody"></tbody>
+                        </table>
+                    </div>
+                    <p id="asistenciaRapidaEmpty" class="empty-msg" style="margin-top:12px;">
+                        No hay estudiantes registrados. Agrega estudiantes primero.
+                    </p>
+                </div>
+
+                <div class="table-container">
+                    <h3>Historial de Asistencia</h3>
+                    <div class="search-bar">
+                        <select id="filterAsisEstudiante">
+                            <option value="">Todos los estudiantes</option>
+                        </select>
+                        <input type="date" id="filterAsisFecha">
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="asistenciaTableBody"></tbody>
+                        </table>
+                    </div>
+                    <p id="asistenciaEmpty" class="empty-msg">No hay asistencias registradas.</p>
+                </div>
+            </section>
+
+            <!-- Sección: Actividad por Curso -->
+            <section id="actividad" class="section">
+                <h2>&#128200; Actividad por Curso</h2>
+
+                <div class="form-card">
+                    <h3>Reporte de Actividad General</h3>
+                    <p style="color:var(--gray-600);font-size:0.85rem;margin-bottom:12px;">
+                        Muestra el total de asistencias, tareas y evaluaciones registradas por cada estudiante.
+                        No es nota ponderada, es conteo de actividad.
+                    </p>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="actividadCurso">Curso</label>
+                            <select id="actividadCurso">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                        <button id="btnGenerarActividad" class="btn btn-primary">Generar Reporte</button>
+                        <button id="btnExportActExcel" class="btn btn-success">&#128229; Exportar Excel</button>
+                        <button id="btnExportActPDF" class="btn btn-warning">&#128196; Exportar PDF</button>
+                    </div>
+                </div>
+
+                <div id="actividadResultado">
+                    <div class="table-container">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+                            <h3 id="actividadTitulo">Actividad - Seleccione un curso</h3>
+                            <div style="font-size:0.85rem;color:var(--gray-600);">
+                                <span style="display:inline-block;margin-right:16px;">&#9679; Asistencia: 4.2 c/u</span>
+                                <span style="display:inline-block;margin-right:16px;">&#9679; Tareas: 1.8 c/u</span>
+                                <span style="display:inline-block;">&#9679; Evaluaciones: 10 c/u</span>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="actividadTable">
+                                <thead>
+                                    <tr>
+                                        <th>N°</th>
+                                        <th>Matrícula</th>
+                                        <th>Nombre</th>
+                                        <th>Asistencia<br><small>cant. × 4.2</small></th>
+                                        <th>Tareas<br><small>cant. × 1.8</small></th>
+                                        <th>Evaluaciones<br><small>cant. × 10</small></th>
+                                        <th>Total<br><small>Actividad</small></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="actividadTableBody"></tbody>
+                            </table>
+                        </div>
+                        <p id="actividadEmpty" class="empty-msg">No hay estudiantes en este curso.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección: Notas por Curso -->
+            <section id="notas" class="section">
+                <h2>&#128202; Notas por Curso</h2>
+
+                <div class="form-card">
+                    <h3>Generar Notas por Curso</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="notasCurso">Curso</label>
+                            <select id="notasCurso">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                        <button id="btnGenerarNotas" class="btn btn-primary">Generar Notas</button>
+                        <button id="btnExportarExcel" class="btn btn-success">&#128229; Exportar Excel</button>
+                        <button id="btnExportarPDF" class="btn btn-warning">&#128196; Exportar PDF</button>
+                    </div>
+                </div>
+
+                <div id="notasResultado">
+                    <div class="table-container">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+                            <h3 id="notasTitulo">Notas - Seleccione un curso</h3>
+                            <div style="font-size:0.85rem;color:var(--gray-600);">
+                                <span style="display:inline-block;margin-right:16px;">&#9679; Asistencia: 50% (12 semanas)</span>
+                                <span style="display:inline-block;margin-right:16px;">&#9679; Evaluaciones: 30% (3 evaluaciones)</span>
+                                <span style="display:inline-block;">&#9679; Tareas: 20% (11 tareas)</span>
+                            </div>
+                        </div>
+                        <div class="table-responsive" id="notasTableContainer">
+                            <table id="notasTable">
+                                <thead>
+                                    <tr>
+                                        <th>N°</th>
+                                        <th>Matrícula</th>
+                                        <th>Nombre</th>
+                                        <th>Asistencia<br><small>/50</small></th>
+                                        <th>Evaluaciones<br><small>/30</small></th>
+                                        <th>Tareas<br><small>/20</small></th>
+                                        <th>Nota Final<br><small>/100</small></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="notasTableBody"></tbody>
+                            </table>
+                        </div>
+                        <p id="notasEmpty" class="empty-msg">No hay estudiantes en este curso.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección: Reportes -->
+            <section id="reportes" class="section">
+                <h2>&#128200; Reportes y Promedios</h2>
+
+                <div class="form-card">
+                    <h3>Generar Reporte</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="reporteEstudiante">Estudiante</label>
+                            <select id="reporteEstudiante" required>
+                                <option value="">Seleccionar estudiante...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="reporteTipo">Tipo de Reporte</label>
+                            <select id="reporteTipo">
+                                <option value="completo">Reporte Completo</option>
+                                <option value="tareas">Solo Tareas</option>
+                                <option value="evaluaciones">Solo Evaluaciones</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="btnGenerarReporte" class="btn btn-primary">Generar Reporte</button>
+                </div>
+
+                <div id="reporteResultado" class="report-card hidden">
+                    <h3 id="reporteTitulo"></h3>
+                    <div class="student-info-bar" id="reporteInfoEstudiante"></div>
+
+                    <div class="stats-grid" id="statsGrid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="statPromedio">0.0</div>
+                            <div class="stat-label">Promedio General</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="statTareas">0</div>
+                            <div class="stat-label">Tareas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="statEvaluaciones">0</div>
+                            <div class="stat-label">Evaluaciones</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="statAsistencia">0%</div>
+                            <div class="stat-label">Asistencia</div>
+                        </div>
+                    </div>
+
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-label">
+                            <span id="progressText">0 / 100</span>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <h4>Detalle de Calificaciones</h4>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Nombre</th>
+                                        <th>Fecha</th>
+                                        <th>Puntaje</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reporteDetalleBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <h4>Asistencia</h4>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reporteAsistenciaBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Dialog para editar -->
+    <div class="modal-overlay hidden" id="modalOverlay">
+        <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+                <h3 id="modalTitle">Editar</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Botón para exportar datos -->
+    <div class="fab-container">
+        <button class="fab" id="fabMenu" aria-label="Menú de opciones">&#9432;</button>
+        <div class="fab-options hidden" id="fabOptions">
+            <button class="fab-option" data-action="export">&#128229; Exportar Datos</button>
+            <button class="fab-option" data-action="import">&#128228; Importar Datos</button>
+            <button class="fab-option" data-action="clear">&#128465; Limpiar Datos</button>
+        </div>
+    </div>
+
+    <input type="file" id="importFileInput" accept=".json" style="display:none">
+
+    <script src="app.js"></script>
+</body>
+</html>
