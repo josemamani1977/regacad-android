@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">RegAcad</string>
+    <string name="title_activity_main">RegAcad</string>
+    <string name="package_name">com.regacad.app</string>
+    <string name="custom_url_scheme">com.regacad.app</string>
+</resources>

@@ -1,0 +1,15 @@
+{
+  "appId": "com.regacad.app",
+  "appName": "RegAcad",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "backgroundColor": "#1a73e8"
+    }
+  }
+}
